@@ -1,8 +1,8 @@
-import random, bcrypt, jwt
+import bcrypt, jwt
 
-from django.test import TestCase, Client
+from django.test           import TestCase, Client
 
-from accounts.models import User
+from accounts.models       import User
 from eightpercent.settings import SECRET_KEY, ALGORITHM
 
 client = Client()
