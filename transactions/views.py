@@ -116,7 +116,7 @@ class TransactionListView(View):
             q &= Q(created_at__range=(start_date, end_date))
             
             if type:
-                q &= Q(transaction_type__type=type)        
+                q &= Q(transaction_type__name=type)        
             
             transactions = Transaction.objects.filter(q, account_id=account.id).order_by(order)[offset:offset+limit]
 

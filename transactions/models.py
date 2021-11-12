@@ -24,3 +24,6 @@ class Transaction(models.Model):
     
     class Meta:
         db_table = 'transactions'
+        indexes = [
+            models.Index(fields=['account_id'])
+        ]
