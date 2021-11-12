@@ -28,7 +28,7 @@ class SignUp(View):
             password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
             # 고유한 신규계좌 발급 / 기존 생성된 계좌번호들과 중복 방지를 위한 대조
-            def Account_number():
+            def account_number():
                 def numbers():
                     number = random.randint(1000, 9999)
                     return number
@@ -38,7 +38,7 @@ class SignUp(View):
                 if not Account.objects.filter(number=account_number).exists():
                    return account_number
 
-                return Account_number()
+                return account_number()
             
             user = User.objects.create(
                 name     = data['name'],
@@ -47,7 +47,7 @@ class SignUp(View):
             )
 
             Account.objects.create(
-                number  = Account_number(),
+                number  = account_number(),
                 user_id = user.id
             )
             return JsonResponse({'message': 'SUCCESS'}, status=201)
