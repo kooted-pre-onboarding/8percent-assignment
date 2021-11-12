@@ -252,17 +252,19 @@ q &= Q(created_at__range=(start_date, end_date))
 <br>
 
 ### ▶︎ 설치 및 실행 방법
-#### Local 개발 및 테스트 용
+#### - Local 개발 및 테스트 용
 1. 해당 프로젝트를 clone하고, 프로젝트 폴더로 이동한다.
 ```shell
 git clone https://github.com/kooted-pre-onboarding/8percent-assignment.git
 cd 8percent-assignment
 ```
+
 2. 가상 환경을 생성하고 프로젝트에 사용한 python package를 설치한다
 ```shell
 conda create -n "8percent" python=3.8
 conda activate 8percent
 ```
+
 3. docker 환경 설정 파일을 생성하고 다음을 작성한다.
 ```shell
 touch .env
@@ -272,44 +274,52 @@ vi .env
 EIGHTPERCENT_SECRET_KEY=SECRET_KEY
 EIGHTPERCENT_ALGORITHM=HS256
 ```
+
 4. 다음 명령어로 서버를 실행시킨다
 ```shell
 docker-compose -f docker-compose.yml up 
 ```
+
 4-1. 백그라운드로 실행하고싶을 시 `-d`옵션을 추가한다.
 ``` shell
 docker-compose -f docker-compose.yml up -d
 ```
 
-- 배포용
+#### - 배포용
 
 1. 해당 프로젝트를 clone하고, 프로젝트 폴더로 이동한다.
 ```shell
 git clone https://github.com/kooted-pre-onboarding/8percent-assignment.git
 cd 8percent-assignment
 ```
+
 2. 가상 환경을 생성하고 프로젝트에 사용한 python package를 설치한다
 ```shell
 conda create -n "8percent" python=3.8
 conda activate 8percent
 ```
+
 3. docker 환경 설정 파일을 생성하고 다음을 작성한다. 
 ```shell
 touch .env
 vi .env
 ```
+
 ``` env
 EIGHTPERCENT_SECRET_KEY=SECRET_KEY
 EIGHTPERCENT_ALGORITHM=HS256
 ```
+
 4. 다음 명령어로 서버를 실행시킨다
 ```shell
 sudo docker-compse -f docker-compose-deploy.yml up
 ```
+
 4-1. 백그라운드로 실행하고싶을 시 `-d`옵션을 추가한다.
 ```shell
 sudo docker-compse -f docker-compose-deploy.yml up -d
 ```
+
 <br>
 <br>
 <br>
