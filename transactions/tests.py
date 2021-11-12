@@ -1,4 +1,4 @@
-import jwt, bcrypt
+import json, jwt, bcrypt
 from datetime              import date, datetime, timedelta
 
 from django.test           import TestCase, Client
@@ -7,6 +7,190 @@ from eightpercent.settings import SECRET_KEY, ALGORITHM
 from accounts.models       import User, Account
 from transactions.models   import Transaction, TransactionType
 
+
+class DepositTransactionView(TestCase):
+    def setUp(self):
+        password = 'sample_password'
+        user = User.objects.create(
+            id       = 1,
+            email    = "example@naver.com",
+            password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            name     = '김참작'
+        )
+
+        self.token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
+
+        Account.objects.create(
+            id      = 1,
+            number  = "5487-6848-6848-6847",
+            balance = 300000,
+            user_id = 1,
+        )
+
+        TransactionType.objects.create( id = 1, name = "입금" )
+
+    def tearDown(self):
+        User.objects.all().delete()
+        Account.objects.all().delete()
+        TransactionType.objects.all().delete()
+
+    def test_deposit_transaction_post_success(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : 10000, "sum_up" : "5"}
+
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(data),
+            content_type="application/json",**headers
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_deposit_transaction_post_invalid_input(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : -10000, "sum_up" : "5"}
+
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(data),
+            content_type="application/json",**headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "INVALID_INPUT"})
+
+    def test_deposit_transaction_post_type_error(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : "10000", "sum_up" : 5}
+
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(data),
+            content_type="application/json",**headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "TYPE_ERROR"})
+
+    def test_deposit_transaction_post_key_error(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : 10000}
+        
+        response = client.post(
+            "/transactions/deposit",
+            json.dumps(data),
+            content_type="application/json", **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "KEY_ERROR"})
+
+
+class WithdrawTransactionTest(TestCase):
+    def setUp(self):
+        password = 'sample_password'
+        user = User.objects.create(
+            id       = 1,
+            email    = "example@naver.com",
+            password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            name     = '김참작'
+        )
+
+        self.token = jwt.encode({"user_id": user.id}, SECRET_KEY, algorithm=ALGORITHM)
+
+        Account.objects.create(
+            id      = 1,
+            number  = "5487-6848-6848-6847",
+            balance = 30000,
+            user_id = 1,
+        )
+
+        TransactionType.objects.create(id=2, name="출금")
+
+    def tearDown(self):
+        User.objects.all().delete()
+        Account.objects.all().delete()
+        TransactionType.objects.all().delete()
+
+    def test_withdrawal_post_success(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : 10000, "sum_up" : 5}
+
+        response = client.post(
+            "/transactions/withdraw",
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        self.assertEqual(response.status_code, 201)
+
+    def test_withdrawal_post_invalid_input(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : -10000, "sum_up" : 5}
+
+        response = client.post(
+            "/transactions/withdraw",
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "INVALID_INPUT"})
+
+    def test_withdrawal_post_exceed_input(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : 50000, "sum_up" : 5}
+
+        response = client.post(
+            "/transactions/withdraw",
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "WRONG_REQUEST"})
+
+    def test_withdrawal_post_type_error(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : "10000", "sum_up" : 5}
+
+        response = client.post(
+            "/transactions/withdraw",
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "TYPE_ERROR"})
+
+    def test_withdrawal_post_key_error(self):
+        client = Client()
+
+        headers = {'HTTP_Authorization': self.token}
+        data = {"amount" : 10000}
+
+        response = client.post(
+            "/transactions/withdraw",
+            json.dumps(data),
+            content_type="application/json",
+            **headers
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {"message": "KEY_ERROR"})
+
+
 class TransactionListTest(TestCase):
     def setUp(self):
         password = 'testpassword2@'
@@ -14,7 +198,7 @@ class TransactionListTest(TestCase):
             id       = 1,
             name     = 'test_user',
             email    = 'test@gmail.com',
-            password = password #bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         )
         self.access_token = jwt.encode({'user_id':user.id}, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -83,8 +267,6 @@ class TransactionListTest(TestCase):
                     })
         
     def test_transaction_list_empty_order_fail(self):
-        created_at1 = Transaction.objects.get(id=1).created_at
-        created_at2 = Transaction.objects.get(id=2).created_at
                 
         client   = Client()
         headers  = {'HTTP_Authorization' : self.access_token}
@@ -95,8 +277,6 @@ class TransactionListTest(TestCase):
         self.assertEqual(response.json(), {'message':'ORDER_CAN_NOT_BE_EMPTY'})
 
     def test_transaction_list_empty_date_range_fail(self):
-        created_at1 = Transaction.objects.get(id=1).created_at
-        created_at2 = Transaction.objects.get(id=2).created_at
                 
         client   = Client()
         headers  = {'HTTP_Authorization' : self.access_token}
@@ -107,8 +287,6 @@ class TransactionListTest(TestCase):
         self.assertEqual(response.json(), {'message':'DATE_RANGE_CAN_NOT_BE_EMPTY'})
 
     def test_transaction_list_invalid_date_range_fail(self):
-        created_at1 = Transaction.objects.get(id=1).created_at
-        created_at2 = Transaction.objects.get(id=2).created_at
                 
         client   = Client()
         headers  = {'HTTP_Authorization' : self.access_token}
@@ -119,8 +297,6 @@ class TransactionListTest(TestCase):
         self.assertEqual(response.json(), {'message':'INVALID_DATE_RANGE'})
 
     def test_transaction_list_value_error_fail(self):
-        created_at1 = Transaction.objects.get(id=1).created_at
-        created_at2 = Transaction.objects.get(id=2).created_at
                 
         client   = Client()
         headers  = {'HTTP_Authorization' : self.access_token}
@@ -131,9 +307,7 @@ class TransactionListTest(TestCase):
         self.assertEqual(response.json(), {'message':'VALUE_ERROR'})
 
     def test_transaction_list_field_error_fail(self):
-        created_at1 = Transaction.objects.get(id=1).created_at
-        created_at2 = Transaction.objects.get(id=2).created_at
-                
+
         client   = Client()
         headers  = {'HTTP_Authorization' : self.access_token}
         response = client.get(f'/transactions?start-date={date.today()}&end-date={date.today()}&order=wrong!!!!',
