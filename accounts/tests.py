@@ -2,14 +2,14 @@ import random, bcrypt, jwt
 
 from django.test import TestCase, Client
 
-from accounts.models import User, Account
+from accounts.models import User
 from eightpercent.settings import SECRET_KEY, ALGORITHM
 
 client = Client()
 
 class SignUpTest(TestCase):
     def setUp(self):
-        User.objects.create(name='hana', email='goodLuck@toyou.com', password='123abc!@')
+        User.objects.create(id=1, name='hana', email='goodLuck@toyou.com', password='123abc!@')
 
     def tearDown(self):
         User.objects.all().delete()
@@ -20,7 +20,7 @@ class SignUpTest(TestCase):
             'email'    : 'haveAniceDay@toyou.com', 
             'password' : '123abc!@'
         }
-        response = client.post('/users/signup', data=data, content_type='application/json')
+        response = client.post('/accounts/signup', data=data, content_type='application/json')
         
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), {'message' : 'SUCCESS'})
@@ -31,7 +31,7 @@ class SignUpTest(TestCase):
             'email'    : 'goodLuck@toyou.com', 
             'password' : '123abc!@'
         }
-        response = client.post('/users/signup', data=data, content_type='application/json')
+        response = client.post('/accounts/signup', data=data, content_type='application/json')
         
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'message' : 'EXIST_EMAIL'})
@@ -42,7 +42,7 @@ class SignUpTest(TestCase):
             'password' : '123abc@'
         }
 
-        response = client.post('/users/signin', data=data, content_type='application/json')
+        response = client.post('/accounts/signin', data=data, content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'message' : 'KEY_ERROR'})
@@ -67,9 +67,9 @@ class SignInTest(TestCase):
             'password' : '123abc!@'
         }
 
-        response = client.post('/users/signin', data=data, content_type='application/json')
+        response = client.post('/accounts/signin', data=data, content_type='application/json')
 
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {'access_token' : access_token})
 
     def test_signin_invalid_email(self):
@@ -78,7 +78,7 @@ class SignInTest(TestCase):
             'password' : '123abc@!'
         }
 
-        response = client.post('/users/signin', data=data, content_type='application/json')
+        response = client.post('/accounts/signin', data=data, content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'message' : 'INVALID_USER'})
@@ -89,7 +89,7 @@ class SignInTest(TestCase):
             'password' : '123abc@'
         }
 
-        response = client.post('/users/signin', data=data, content_type='application/json')
+        response = client.post('/accounts/signin', data=data, content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json(), {'message' : 'INVALID_PASSWORD'})
@@ -100,7 +100,7 @@ class SignInTest(TestCase):
             'password' : '123abc@'
         }
 
-        response = client.post('/users/signin', data=data, content_type='application/json')
+        response = client.post('/accounts/signin', data=data, content_type='application/json')
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), {'message' : 'KEY_ERROR'})
