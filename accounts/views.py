@@ -1,9 +1,9 @@
 import json, re, bcrypt, jwt, random
-from json.decoder import JSONDecodeError
+from json.decoder           import JSONDecodeError
 
-from django.http  import JsonResponse
-from django.views import View
-from django.db    import transaction
+from django.http            import JsonResponse
+from django.views           import View
+from django.db              import transaction
 
 from accounts.models        import User, Account
 from eightpercent.settings  import SECRET_KEY, ALGORITHM
