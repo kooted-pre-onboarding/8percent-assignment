@@ -95,7 +95,10 @@ class TransactionListView(View):
             type       = request.GET.get('type', None)
             order      = request.GET.get('order', None)
             offset     = int(request.GET.get('offset', 0))
-            limit      = int(request.GET.get('limit', 50))
+            limit      = int(request.GET.get('limit', 100))
+            
+            if limit > 100:
+                return JsonResponse({'message':'TOO_MUCH_LIMIT'}, status=400)
 
             if not order:
                 return JsonResponse({'message':'ORDER_CAN_NOT_BE_EMPTY'}, status=400)
