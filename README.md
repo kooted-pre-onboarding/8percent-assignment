@@ -347,6 +347,7 @@ class Transaction(models.Model):
 
 테스트 결과는 [Postman loadtest 문서 링크](https://documenter.getpostman.com/view/18218753/UVC2H9Er)에서 확인 가능합니다.
 
+
 > ## API Document & Test
 
 <br>
@@ -355,8 +356,6 @@ class Transaction(models.Model):
 2. 개인 Workspace로 Import 합니다.
 
 3. hostname 환경변수를 deploy로 선택합니다.
-
-![스크린샷 2021-11-12 오후 9.00.29](/Users/seungjun/Library/Application Support/typora-user-images/스크린샷 2021-11-12 오후 9.00.29.png)
 
 4. 배포 주소 `13.125.45.93:8000` 를 확인합니다.
 5. API 문서 예시를 참고해 Request를 보냅니다.
