@@ -18,13 +18,12 @@ class DepositView(View):
         try:
             data = json.loads(request.body)
             user = request.user
-            account = Account.objects.get(user_id = user.id)
 
             if data["amount"] <= 0:
                 return JsonResponse({"message" : "INVALID_INPUT"}, status=400)
         
             with transaction.atomic():
-
+                account = Account.objects.get(user_id=user.id).select_for_update()
                 account.balance += data["amount"]
                 account.save()
 
@@ -50,16 +49,16 @@ class WithdrawView(View):
         try:
             data = json.loads(request.body)
             user = request.user
-            account = Account.objects.get(user_id = user.id)
 
             if data["amount"] <= 0:
                 return JsonResponse({"message": "INVALID_INPUT"}, status=400)
 
-            if data["amount"] > account.balance:
-                return JsonResponse({"message": "WRONG_REQUEST"}, status=400)
-            
             with transaction.atomic():
-
+                account = Account.objects.get(user_id=user.id).select_for_update()
+                
+                if data["amount"] > account.balance:
+                    return JsonResponse({"message": "WRONG_REQUEST"}, status=400)
+                
                 account.balance -= data["amount"]
                 account.save()
 
